@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SPACEFLIGHT</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%23ffd860'/%3E%3Cellipse cx='16' cy='16' rx='15' ry='4' fill='none' stroke='%233ee6ff' stroke-width='1.5'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+    <canvas id="hud-canvas"></canvas>
+
+    <div id="hud">
+      <!-- corner brackets -->
+      <div class="bracket tl"></div>
+      <div class="bracket tr"></div>
+      <div class="bracket bl"></div>
+      <div class="bracket br"></div>
+
+      <!-- throttle (left) -->
+      <div id="throttle">
+        <div id="throttle-track"><div id="throttle-fill"></div></div>
+        <div class="hud-label">THR</div>
+      </div>
+
+      <!-- boost gauge (bottom center) -->
+      <div id="boost">
+        <div class="hud-label">BOOST</div>
+        <div id="boost-segs"></div>
+      </div>
+
+      <!-- speed readout (bottom right) -->
+      <div id="speed">
+        <span id="speed-value">0</span>
+        <span class="hud-label">VEL</span>
+      </div>
+
+      <div id="mute-icon" class="hidden">&#9836;&#824; MUTED</div>
+    </div>
+
+    <div id="hint">CLICK TO TAKE CONTROL</div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
