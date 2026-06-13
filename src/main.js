@@ -63,6 +63,15 @@ const hud = new HUD();
 const game = { scene, camera, input, world, ship, npcs, combat, treasure, stations, effects, audio, hud };
 window.game = game; // dev console access
 
+// flash + sound whenever a gate ring is cleared (onClear gets the cleared count,
+// so the just-cleared ring is rings[i - 1])
+world.systems.forEach((s) => {
+  s.gate.onClear = (i) => {
+    effects.flashRings.spawn(s.gate.rings[i - 1].pos, 0x9b6bff, { maxScale: 90, duration: 0.8 });
+    audio.fireNet?.();
+  };
+});
+
 // audio can only start on a user gesture — the same one that locks the pointer
 for (const evt of ['click', 'keydown']) {
   document.addEventListener(evt, () => audio.start(), { once: false });
