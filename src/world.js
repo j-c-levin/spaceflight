@@ -1,19 +1,5 @@
 import * as THREE from 'three';
-
-// ---------------------------------------------------------------------------
-// Planet data: a stylized flat solar system. Colors are saturated and arcade.
-// `color` doubles as the treasure-orb tint for that planet.
-// ---------------------------------------------------------------------------
-export const PLANET_DEFS = [
-  { name: 'MERCURY', radius: 10,  orbit: 150, speed: 0.012, color: 0xb0a08d, bandA: 0xb0a08d, bandB: 0x8a7a68, rings: null },
-  { name: 'VENUS',   radius: 14,  orbit: 240, speed: 0.009, color: 0xf0c878, bandA: 0xf0c878, bandB: 0xd49a4e, rings: { inner: 1.5, outer: 2.0, color: 0xffd9a0, opacity: 0.18 } },
-  { name: 'EARTH',   radius: 18,  orbit: 340, speed: 0.007, color: 0x4fa8f0, bandA: 0x3f8fe8, bandB: 0x39c98a, rings: null, moon: true },
-  { name: 'MARS',    radius: 13,  orbit: 450, speed: 0.006, color: 0xe06a3c, bandA: 0xe06a3c, bandB: 0xb04826, rings: null },
-  { name: 'JUPITER', radius: 60,  orbit: 650, speed: 0.004, color: 0xe0a468, bandA: 0xe8b87e, bandB: 0xb06a44, rings: { inner: 1.4, outer: 1.8, color: 0xffc890, opacity: 0.22 } },
-  { name: 'SATURN',  radius: 52,  orbit: 900, speed: 0.003, color: 0xf0d49a, bandA: 0xf0d49a, bandB: 0xc8a060, rings: { inner: 1.5, outer: 2.6, color: 0xffe0b0, opacity: 0.45 } },
-  { name: 'URANUS',  radius: 32,  orbit: 1120, speed: 0.0022, color: 0x7fe0e8, bandA: 0x7fe0e8, bandB: 0x4fb0c8, rings: { inner: 1.5, outer: 2.0, color: 0xa0f0ff, opacity: 0.3, tilt: 1.3 } },
-  { name: 'NEPTUNE', radius: 30,  orbit: 1320, speed: 0.0018, color: 0x4f74e8, bandA: 0x4f74e8, bandB: 0x3050b8, rings: { inner: 1.4, outer: 1.9, color: 0x80a0ff, opacity: 0.3 } },
-];
+import { HOME } from './worlddata.js';
 
 // ---------------------------------------------------------------------------
 // Banded planet shader: soft latitudinal stripes that drift over time, lit by
@@ -159,7 +145,7 @@ export class World {
     this.sun.add(sunGlow);
 
     // ---- planets ----
-    this.planets = PLANET_DEFS.map((def, i) => {
+    this.planets = HOME.planets.map((def, i) => {
       const group = new THREE.Group();
       const mat = makePlanetMaterial(def);
       const mesh = new THREE.Mesh(new THREE.SphereGeometry(def.radius, 48, 32), mat);
