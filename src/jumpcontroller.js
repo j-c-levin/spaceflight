@@ -19,6 +19,7 @@ export class JumpController {
     this.state = 'idle';     // idle | pulling | arriving
     this.t = 0;
     this._from = new THREE.Vector3();
+    this._portal = new THREE.Vector3();
   }
 
   get jumping() { return this.state !== 'idle'; }
@@ -31,15 +32,18 @@ export class JumpController {
     }
     this.t += dt;
     if (this.state === 'pulling') {
-      const portal = g.world.activeSystem.gate.portalPosition;
       const k = Math.min(this.t / PULL_TIME, 1);
       const ease = k * k;                       // accelerate into the portal
-      g.ship.pos.lerpVectors(this._from, portal, ease);
+      g.ship.pos.lerpVectors(this._from, this._portal, ease);
       g.ship.root.position.copy(g.ship.pos);
-      g.ship.root.lookAt(portal);               // face the portal as you're pulled in
-      g.ship.vel.set(0, 0, 0); g.ship.speed = 0;
+      // Ship orientation is driven by lookAt(this._portal) during pull; left as-is during arriving.
+      g.ship.root.lookAt(this._portal);
       this.warp.update(dt, k * 0.5);            // phase 0 -> 0.5 (flash builds to peak)
-      if (k >= 1) { this._swap(); this.state = 'arriving'; this.t = 0; }
+      if (k >= 1) {
+        this._swap();
+        this.state = 'arriving';
+        this.t = 0;
+      }
     } else if (this.state === 'arriving') {
       const k = Math.min(this.t / ARRIVE_TIME, 1);
       this.warp.update(dt, 0.5 + k * 0.5);      // phase 0.5 -> 1 (flash fades)
@@ -51,6 +55,11 @@ export class JumpController {
     this.state = 'pulling';
     this.t = 0;
     this._from.copy(this.game.ship.pos);
+    // Capture portal position once so the pulling branch doesn't traverse the scene graph each frame.
+    this._portal.copy(this.game.world.activeSystem.gate.portalPosition);
+    // Zero velocity once here; ship.update early-returns while controlsLocked so it won't re-integrate.
+    this.game.ship.vel.set(0, 0, 0);
+    this.game.ship.speed = 0;
     this.game.ship.controlsLocked = true;
     this.warp.start();
   }
@@ -59,6 +68,11 @@ export class JumpController {
     const g = this.game;
     const targetId = g.world.activeSystem.def.gate.targetId;
     const targetIndex = g.world.systems.findIndex((s) => s.def.id === targetId);
+    if (targetIndex === -1) {
+      console.error('JumpController: no system with id', targetId);
+      this._end();
+      return;
+    }
     const dest = g.world.jumpTo(targetIndex);
     dest.gate.reset();
     // place the ship just outside the destination portal, facing inward
