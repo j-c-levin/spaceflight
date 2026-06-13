@@ -242,7 +242,11 @@ export class World {
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      depthTest: false,
+      // depth-test ON so opaque planets/sun occlude the star dome (which sits at
+      // radius 3500 around the camera — always farther than any planet). Without
+      // this the transparent stars draw over already-rendered planets, making
+      // them look see-through.
+      depthTest: true,
     });
     this.starfield = new THREE.Points(geo, mat);
     this.starfield.renderOrder = -10;
