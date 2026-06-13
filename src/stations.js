@@ -1,11 +1,10 @@
 import * as THREE from 'three';
 
 const REFUEL_RADIUS = 70;
-const STATION_SCALE = 3;
 
 // Compact modular refuel stations with a glowing docking ring. Flying close
 // instantly tops up boost energy with an expanding-ring pulse.
-function buildStation() {
+export function buildStation() {
   const g = new THREE.Group();
   const hull = new THREE.MeshStandardMaterial({
     color: 0x9aa8c0, roughness: 0.5, metalness: 0.5,
@@ -41,25 +40,13 @@ function buildStation() {
 export class Stations {
   constructor(scene) {
     this.scene = scene;
-    const spots = [
-      new THREE.Vector3(260, 0, 120),
-      new THREE.Vector3(-520, 12, 330),
-      new THREE.Vector3(780, -10, -480),
-      new THREE.Vector3(-220, 0, -1050),
-    ];
-    this.stations = spots.map((pos) => {
-      const mesh = buildStation();
-      mesh.scale.setScalar(STATION_SCALE);
-      mesh.position.copy(pos);
-      mesh.rotation.y = Math.random() * Math.PI;
-      scene.add(mesh);
-      return { mesh, pos, recharged: false };
-    });
+    // Stations now live on each SolarSystem; this manager just runs the
+    // refuel proximity/pulse logic against the active system's stations.
   }
 
   update(dt, game) {
     const { ship, effects, audio } = game;
-    for (const st of this.stations) {
+    for (const st of game.world.stations) {
       st.mesh.rotation.y += dt * 0.08;
       st.mesh.userData.ring.rotation.z += dt * 0.3;
       const near = st.pos.distanceTo(ship.pos) < REFUEL_RADIUS;
