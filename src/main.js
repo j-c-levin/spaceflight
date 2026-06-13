@@ -5,6 +5,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 import { Input } from './input.js';
+import { TouchControls } from './touch.js';
 import { World } from './world.js';
 import { PlayerShip, FLIGHT } from './ship.js';
 import { ChaseCamera } from './camera.js';
@@ -42,6 +43,7 @@ composer.addPass(new OutputPass());
 
 // ---- systems ----
 const input = new Input(sceneCanvas);
+const touch = new TouchControls(input);
 const world = new World(scene);
 const ship = new PlayerShip(scene, world.glowTex);
 const chaseCam = new ChaseCamera(camera);
@@ -84,6 +86,7 @@ function frame(now) {
   const t = now / 1000;
 
   input.update(dt);
+  touch.update(dt);
 
   if (input.mutePressed) audio.setMuted(!audio.muted);
   if (input.firePressed) {

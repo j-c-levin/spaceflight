@@ -143,3 +143,128 @@ html, body {
   0%, 100% { opacity: 0.9; }
   50% { opacity: 0.3; }
 }
+
+/* ============================================================
+   Touch controls — shown only on touch devices via TouchControls
+   ============================================================ */
+#touch-controls {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none; /* container is inert; children opt back in */
+  color: var(--hud);
+  text-shadow: 0 0 6px var(--hud-glow);
+}
+#touch-controls.hidden { display: none; }
+#touch-controls > * { pointer-events: auto; touch-action: none; }
+
+/* ---- steering joystick (bottom-left) ---- */
+#touch-stick {
+  position: absolute;
+  left: 26px;
+  bottom: 30px;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  border: 2px solid var(--hud-dim);
+  background: radial-gradient(circle, rgba(62, 230, 255, 0.10), rgba(62, 230, 255, 0.02) 70%);
+  box-shadow: 0 0 14px rgba(62, 230, 255, 0.22), inset 0 0 18px rgba(62, 230, 255, 0.10);
+}
+#touch-stick-thumb {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-radius: 50%;
+  border: 2px solid var(--hud);
+  background: radial-gradient(circle, rgba(62, 230, 255, 0.55), rgba(62, 230, 255, 0.20));
+  box-shadow: 0 0 16px var(--hud-glow);
+  will-change: transform;
+}
+
+/* ---- throttle slider (left edge, above joystick) ---- */
+#touch-throttle {
+  position: absolute;
+  left: 34px;
+  top: 16%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+#touch-throttle-track {
+  position: relative;
+  width: 30px;
+  height: 150px;
+  border: 1px solid var(--hud-dim);
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(62, 230, 255, 0.25), inset 0 0 8px rgba(62, 230, 255, 0.12);
+  overflow: hidden;
+}
+#touch-throttle-fill {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 45%;
+  background: linear-gradient(to top, rgba(62, 230, 255, 0.85), rgba(62, 230, 255, 0.30));
+}
+#touch-throttle-thumb {
+  position: absolute;
+  left: -3px;
+  width: 36px;
+  height: 14px;
+  bottom: 45%;
+  margin-bottom: -7px;
+  border: 2px solid var(--hud);
+  background: rgba(62, 230, 255, 0.35);
+  box-shadow: 0 0 12px var(--hud-glow);
+  border-radius: 3px;
+}
+
+/* ---- action buttons (bottom-right) ---- */
+#touch-buttons {
+  position: absolute;
+  right: 30px;
+  bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.touch-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--hud-dim);
+  font-family: "Lucida Console", Monaco, monospace;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--hud);
+  text-shadow: 0 0 6px var(--hud-glow);
+  background: radial-gradient(circle, rgba(62, 230, 255, 0.10), rgba(62, 230, 255, 0.02) 70%);
+  box-shadow: 0 0 12px rgba(62, 230, 255, 0.20), inset 0 0 14px rgba(62, 230, 255, 0.08);
+  transition: background 0.08s, box-shadow 0.08s, transform 0.08s;
+}
+#touch-shoot {
+  width: 104px;
+  height: 104px;
+  font-size: 16px;
+  border-color: rgba(255, 160, 74, 0.6);
+  color: #ffd860;
+  background: radial-gradient(circle, rgba(255, 200, 90, 0.16), rgba(255, 160, 74, 0.03) 70%);
+  box-shadow: 0 0 14px rgba(255, 180, 80, 0.30), inset 0 0 16px rgba(255, 180, 80, 0.10);
+}
+#touch-boost { width: 78px; height: 78px; }
+.touch-btn.active {
+  transform: scale(0.94);
+  background: radial-gradient(circle, rgba(62, 230, 255, 0.40), rgba(62, 230, 255, 0.12));
+  box-shadow: 0 0 20px var(--hud-glow), inset 0 0 18px rgba(62, 230, 255, 0.20);
+}
+#touch-shoot.active {
+  background: radial-gradient(circle, rgba(255, 200, 90, 0.55), rgba(255, 160, 74, 0.18));
+  box-shadow: 0 0 22px rgba(255, 190, 90, 0.7), inset 0 0 18px rgba(255, 190, 90, 0.25);
+}

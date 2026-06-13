@@ -10,6 +10,10 @@ export class Input {
     this.locked = false;
     this.wheelDelta = 0;
 
+    // touch overrides (set by TouchControls; null/false on desktop)
+    this.throttleTarget = null; // absolute throttle [0,1], or null = keyboard/wheel
+    this.touchBoost = false;
+
     // one-frame event flags, consumed by game systems
     this.firePressed = false;
     this.clickPressed = false;
@@ -76,5 +80,5 @@ export class Input {
 
   get throttleUp() { return this.keys.has('KeyW'); }
   get throttleDown() { return this.keys.has('KeyS'); }
-  get boosting() { return this.keys.has('ShiftLeft') || this.keys.has('ShiftRight'); }
+  get boosting() { return this.touchBoost || this.keys.has('ShiftLeft') || this.keys.has('ShiftRight'); }
 }
