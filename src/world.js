@@ -1,12 +1,13 @@
 import * as THREE from 'three';
-import { HOME } from './worlddata.js';
+import { SYSTEM_DEFS } from './worlddata.js';
+import { SolarSystem } from './solarsystem.js';
 
 // ---------------------------------------------------------------------------
 // Banded planet shader: soft latitudinal stripes that drift over time, lit by
 // a half-lambert term from the sun direction plus a deliberate self-glow so
 // every body reads against the dark sky.
 // ---------------------------------------------------------------------------
-function makePlanetMaterial(def) {
+export function makePlanetMaterial(def) {
   return new THREE.ShaderMaterial({
     uniforms: {
       uBandA: { value: new THREE.Color(def.bandA) },
@@ -61,7 +62,7 @@ function makePlanetMaterial(def) {
   });
 }
 
-function makeRing(def, planetRadius) {
+export function makeRing(def, planetRadius) {
   const r = def.rings;
   const inner = planetRadius * r.inner;
   const outer = planetRadius * r.outer;
@@ -128,51 +129,29 @@ export class World {
     this.glowTex = makeGlowTexture();
 
     // ---- lighting: bright and even, colors pop ----
+    // (each SolarSystem carries its own sun(s) and point light(s))
     scene.add(new THREE.AmbientLight(0x8890b0, 1.4));
-    this.sunLight = new THREE.PointLight(0xfff2d0, 30000, 0, 1.8);
-    scene.add(this.sunLight);
 
-    // ---- the sun ----
-    const sunGeo = new THREE.SphereGeometry(55, 48, 32);
-    const sunMat = new THREE.MeshBasicMaterial({ color: 0xffd860 });
-    this.sun = new THREE.Mesh(sunGeo, sunMat);
-    scene.add(this.sun);
-    const sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: this.glowTex, color: 0xffc040, transparent: true, opacity: 0.9,
-      blending: THREE.AdditiveBlending, depthWrite: false,
-    }));
-    sunGlow.scale.setScalar(290);
-    this.sun.add(sunGlow);
+    // ---- toggleable solar systems; only the home system starts active ----
+    this.systems = SYSTEM_DEFS.map((d) => new SolarSystem(scene, d, this.glowTex));
+    this.activeIndex = 0;
+    this.systems[0].setVisible(true);
+    scene.background = new THREE.Color(this.systems[0].def.background);
 
-    // ---- planets ----
-    this.planets = HOME.planets.map((def, i) => {
-      const group = new THREE.Group();
-      const mat = makePlanetMaterial(def);
-      const mesh = new THREE.Mesh(new THREE.SphereGeometry(def.radius, 48, 32), mat);
-      group.add(mesh);
-      if (def.rings) group.add(makeRing(def, def.radius));
-      let moon = null;
-      if (def.moon) {
-        moon = new THREE.Mesh(
-          new THREE.SphereGeometry(4.2, 24, 16),
-          new THREE.MeshStandardMaterial({ color: 0xb8b8c0, emissive: 0x303038, roughness: 0.9 })
-        );
-        group.add(moon);
-      }
-      scene.add(group);
-      return {
-        def,
-        group,
-        mat,
-        moon,
-        angle: (i * 2.4 + 1.1) % (Math.PI * 2), // scattered starting angles
-        deliveryRadius: def.radius * 2.2 + 10,
-        color: new THREE.Color(def.color),
-      };
-    });
-
+    // shared backdrop serves every system; built once, follows the camera
     this.buildStarfield();
     this.buildDust();
+  }
+
+  get activeSystem() { return this.systems[this.activeIndex]; }
+  get planets() { return this.activeSystem.planets; } // back-compat for treasure
+
+  jumpTo(index) {
+    this.activeSystem.setVisible(false);
+    this.activeIndex = index;
+    this.activeSystem.setVisible(true);
+    this.scene.background.set(this.activeSystem.def.background);
+    return this.activeSystem;
   }
 
   buildStarfield() {
@@ -309,26 +288,13 @@ export class World {
     this.scene.add(this.dust);
   }
 
-  planetPosition(p, out) {
-    out.set(Math.cos(p.angle) * p.def.orbit, 0, Math.sin(p.angle) * p.def.orbit);
-    return out;
-  }
-
-  update(dt, cameraPos) {
+  update(dt, cameraPos, shipPos) {
     this.time += dt;
-    for (const p of this.planets) {
-      p.angle += p.def.speed * dt;
-      this.planetPosition(p, p.group.position);
-      p.mat.uniforms.uTime.value = this.time;
-      p.mat.uniforms.uSunDir.value.copy(p.group.position).negate().normalize();
-      p.group.rotation.y += dt * 0.03;
-      if (p.moon) {
-        const a = this.time * 0.25 + 2;
-        p.moon.position.set(Math.cos(a) * p.def.radius * 2.2, 1.5, Math.sin(a) * p.def.radius * 2.2);
-      }
-    }
+    this.activeSystem.update(dt, shipPos || ZERO);
     // sky + dust follow the camera
     this.starfield.position.copy(cameraPos);
     this.dust.material.uniforms.uCenter.value.copy(cameraPos);
   }
 }
+
+const ZERO = new THREE.Vector3();

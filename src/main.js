@@ -112,7 +112,7 @@ function frame(now) {
   chaseCam.update(dt, ship, input);
   camera.updateMatrixWorld();
 
-  world.update(dt, camera.position);
+  world.update(dt, camera.position, ship.pos);
   npcs.update(dt, game);
   combat.update(dt, game);
   treasure.update(dt, game);
