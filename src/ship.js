@@ -113,6 +113,7 @@ export class PlayerShip {
     this.boostEnergy = 1;
     this.boosting = false;
     this.speed = 0;
+    this.controlsLocked = false;                // external controller owns pos during a jump
 
     this._fwd = new THREE.Vector3();
     this._targetVel = new THREE.Vector3();
@@ -127,6 +128,12 @@ export class PlayerShip {
   }
 
   update(dt, input) {
+    if (this.controlsLocked) {
+      // external controller (jump pull) drives this.pos; just mirror to the mesh.
+      this.root.position.copy(this.pos);
+      return;
+    }
+
     const c = input.cursor;
 
     // ---- throttle: ramps, never snaps ----

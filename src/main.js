@@ -16,6 +16,8 @@ import { TreasureSystem } from './treasure.js';
 import { Stations } from './stations.js';
 import { HUD } from './hud.js';
 import { GameAudio } from './audio.js';
+import { Warp } from './warp.js';
+import { JumpController } from './jumpcontroller.js';
 
 // ---------------------------------------------------------------------------
 // Bootstrap. No menus, no screens — the sandbox is alive from the first frame.
@@ -60,7 +62,11 @@ const treasure = new TreasureSystem(scene, world, world.glowTex);
 const stations = new Stations(scene);
 const hud = new HUD();
 
-const game = { scene, camera, input, world, ship, npcs, combat, treasure, stations, effects, audio, hud };
+const warp = new Warp(camera, world.starfield);
+
+const game = { scene, camera, input, world, ship, npcs, combat, treasure, stations, effects, audio, hud, warp };
+const jump = new JumpController(game, warp);
+game.jump = jump;
 window.game = game; // dev console access
 
 // flash + sound whenever a gate ring is cleared (onClear gets the cleared count,
@@ -106,11 +112,11 @@ function frame(now) {
   touch.update(dt);
 
   if (input.mutePressed) audio.setMuted(!audio.muted);
-  if (input.firePressed) {
+  if (input.firePressed && !jump.jumping) {
     combat.fireNet(ship, camera, input.cursor);
     audio.fireNet();
   }
-  if (input.clickPressed) {
+  if (input.clickPressed && !jump.jumping) {
     combat.trySelect(input.cursor, camera, npcs);
   }
 
@@ -122,6 +128,7 @@ function frame(now) {
   camera.updateMatrixWorld();
 
   world.update(dt, camera.position, ship.pos);
+  jump.update(dt);
   npcs.update(dt, game);
   combat.update(dt, game);
   treasure.update(dt, game);
