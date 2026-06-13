@@ -134,6 +134,10 @@ export class PlayerShip {
     if (input.throttleUp) this.throttle += ramp;
     if (input.throttleDown) this.throttle -= ramp;
     if (input.wheelDelta !== 0) this.throttle -= input.wheelDelta * 0.12;
+    if (input.throttleTarget !== null && input.throttleTarget !== undefined) {
+      // touch slider supplies an absolute target — ease toward it, never snap
+      this.throttle += (input.throttleTarget - this.throttle) * (1 - Math.exp(-6 * dt));
+    }
     this.throttle = THREE.MathUtils.clamp(this.throttle, 0, 1);
 
     // ---- boost energy: drains only; stations are the sole refill ----

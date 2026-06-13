@@ -41,6 +41,29 @@
 
     <div id="hint">CLICK TO TAKE CONTROL</div>
 
+    <!-- on-screen touch controls (shown only on touch devices) -->
+    <div id="touch-controls" class="hidden">
+      <!-- throttle slider (left edge, above the joystick) -->
+      <div id="touch-throttle">
+        <div id="touch-throttle-track">
+          <div id="touch-throttle-fill"></div>
+          <div id="touch-throttle-thumb"></div>
+        </div>
+        <div class="hud-label">THR</div>
+      </div>
+
+      <!-- steering joystick (bottom-left) -->
+      <div id="touch-stick">
+        <div id="touch-stick-thumb"></div>
+      </div>
+
+      <!-- action buttons (bottom-right) -->
+      <div id="touch-buttons">
+        <div id="touch-boost" class="touch-btn">BOOST</div>
+        <div id="touch-shoot" class="touch-btn">SHOOT</div>
+      </div>
+    </div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
