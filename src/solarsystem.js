@@ -12,9 +12,7 @@ const STATION_SCALE = 3;
 // ---------------------------------------------------------------------------
 export class SolarSystem {
   constructor(scene, def, glowTex) {
-    this.scene = scene;
     this.def = def;
-    this.glowTex = glowTex;
 
     this.group = new THREE.Group();
     this.group.visible = false;
@@ -104,6 +102,10 @@ export class SolarSystem {
       p.group.position.set(
         Math.cos(p.angle) * p.def.orbit, 0, Math.sin(p.angle) * p.def.orbit
       );
+      // Advance per-system time only while active. An inactive (hidden) system
+      // freezes its uTime AND its orbit angle together, so they stay in sync —
+      // on re-entry animation resumes smoothly with no snap. (Do NOT switch this
+      // to an absolute always-running clock; that would desync from the paused orbit.)
       p.mat.uniforms.uTime.value += dt;
       p.mat.uniforms.uSunDir.value.copy(p.group.position).negate().normalize();
       p.group.rotation.y += dt * 0.03;

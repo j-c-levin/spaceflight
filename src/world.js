@@ -107,6 +107,8 @@ export function makeRing(def, planetRadius) {
   return mesh;
 }
 
+const ZERO = new THREE.Vector3();
+
 // soft round sprite texture shared by stars / dust / glows
 export function makeGlowTexture() {
   const c = document.createElement('canvas');
@@ -145,6 +147,7 @@ export class World {
 
   get activeSystem() { return this.systems[this.activeIndex]; }
   get planets() { return this.activeSystem.planets; } // back-compat for treasure
+  get stations() { return this.activeSystem.stations; }
 
   jumpTo(index) {
     this.activeSystem.setVisible(false);
@@ -296,5 +299,3 @@ export class World {
     this.dust.material.uniforms.uCenter.value.copy(cameraPos);
   }
 }
-
-const ZERO = new THREE.Vector3();

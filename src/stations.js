@@ -46,7 +46,7 @@ export class Stations {
 
   update(dt, game) {
     const { ship, effects, audio } = game;
-    for (const st of game.world.activeSystem.stations) {
+    for (const st of game.world.stations) {
       st.mesh.rotation.y += dt * 0.08;
       st.mesh.userData.ring.rotation.z += dt * 0.3;
       const near = st.pos.distanceTo(ship.pos) < REFUEL_RADIUS;
