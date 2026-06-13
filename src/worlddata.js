@@ -26,7 +26,13 @@ export const BINARY = {
     { radius: 30, color: 0xbfd8ff, glow: 0x90b8ff, glowScale: 180, orbit: 95, phase: Math.PI },
   ],
   barycenterSpeed: 0.05,
-  planets: [], // filled in a later task
+  planets: [
+    { name: 'EMBER',   radius: 40, orbit: 300,  speed: 0.006,  color: 0xff6a4a, bandA: 0xff8a5a, bandB: 0xc03020 },
+    { name: 'TOXIN',   radius: 34, orbit: 520,  speed: 0.004,  color: 0x8fe04a, bandA: 0xa0ff5a, bandB: 0x4f9020 },
+    { name: 'GLACIES', radius: 48, orbit: 760,  speed: 0.003,  color: 0x6ad0ff, bandA: 0x9ae8ff, bandB: 0x3080c0,
+      rings: { inner: 1.4, outer: 2.2, color: 0xbfeaff, opacity: 0.35 } },
+    { name: 'VIOLA',   radius: 30, orbit: 1000, speed: 0.0022, color: 0xb060e0, bandA: 0xc890ff, bandB: 0x7030a0 },
+  ],
   stations: [ [300,0,-160], [-600,20,260], [120,-10,900] ],
   gate: { targetId: 'home', rings: 7, arcRadius: 1650, arcSpan: 1.4, ringHole: 70,
           center: [0,0,1650], facing: [0,0,-1] },
