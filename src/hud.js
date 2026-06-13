@@ -284,11 +284,14 @@ export class HUD {
     // ---- canvas markers ----
     this.ctx.clearRect(0, 0, this.w, this.h);
     this.drawReticle(input.cursor);
-    if (treasure.carrying) {
-      this.drawWaypoint(treasure.carrying, camera, ship.pos);
-    } else {
-      // empty-handed: show where the orbs are
-      for (const orb of treasure.orbs) this.drawOrbMarker(orb, camera, ship.pos);
+    // treasure markers only matter in the home system (where treasure lives)
+    if (treasure.active) {
+      if (treasure.carrying) {
+        this.drawWaypoint(treasure.carrying, camera, ship.pos);
+      } else {
+        // empty-handed: show where the orbs are
+        for (const orb of treasure.orbs) this.drawOrbMarker(orb, camera, ship.pos);
+      }
     }
     const intercept = combat.interceptPoint(ship.pos, this._v.clone());
     if (intercept) this.drawTargetMarker(intercept, camera, time);

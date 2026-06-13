@@ -18,6 +18,16 @@ export class TreasureSystem {
     this.waveTimer = 1.5;  // first wave lands moments after start
     this.orbGeo = new THREE.SphereGeometry(2.6, 24, 16);
     this._tmp = new THREE.Vector3();
+    this.active = true;
+  }
+
+  // Show/hide all orb meshes and freeze the delivery loop. Idempotent: a no-op
+  // when state is unchanged, so it's safe & cheap to call every frame. All
+  // internal state (orbs, carried planet, wave timer) is preserved untouched.
+  setActive(active) {
+    if (this.active === active) return;
+    this.active = active;
+    for (const o of this.orbs) o.mesh.visible = active;
   }
 
   spawnWave() {
@@ -48,6 +58,7 @@ export class TreasureSystem {
   }
 
   update(dt, game) {
+    if (!this.active) return;
     const { ship, effects, audio } = game;
     const t = this.world.time;
 

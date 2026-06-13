@@ -187,6 +187,7 @@ class NPCShip {
 export class NPCFleet {
   constructor(scene, glowTex) {
     this.ships = [];
+    this.active = true;
     for (let i = 0; i < 5; i++) {
       this.ships.push(new NPCShip(scene, glowTex, WANDER_COLORS[i % WANDER_COLORS.length], false));
     }
@@ -195,7 +196,21 @@ export class NPCFleet {
     }
   }
 
+  // Show/hide the whole fleet and freeze its per-frame update. Idempotent:
+  // a no-op when the state is unchanged, so it's cheap to call every frame.
+  // Internal state (alive flags, positions, respawn timers) is preserved.
+  setActive(active) {
+    if (this.active === active) return;
+    this.active = active;
+    for (const s of this.ships) {
+      // only a living, non-active ship's mesh should follow `active`;
+      // dead ships stay hidden until they respawn.
+      s.mesh.visible = active && s.alive;
+    }
+  }
+
   update(dt, game) {
+    if (!this.active) return;
     for (const s of this.ships) s.update(dt, game);
   }
 }

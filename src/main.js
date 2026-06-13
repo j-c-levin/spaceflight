@@ -129,6 +129,12 @@ function frame(now) {
 
   world.update(dt, camera.position, ship.pos);
   jump.update(dt);
+
+  // treasure orbs & NPCs live only in the home system — hide/freeze them away.
+  const homeActive = world.activeSystem.def.id === 'home';
+  treasure.setActive(homeActive);
+  npcs.setActive(homeActive);
+
   npcs.update(dt, game);
   combat.update(dt, game);
   treasure.update(dt, game);
