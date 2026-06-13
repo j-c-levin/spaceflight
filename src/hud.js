@@ -26,7 +26,12 @@ export class HUD {
 
     this._v = new THREE.Vector3();
     this.resize();
-    window.addEventListener('resize', () => this.resize());
+    const onResize = () => this.resize();
+    window.addEventListener('resize', onResize);
+    // iOS standalone fires 'resize' unreliably on rotation; also re-sync on
+    // orientation and visual-viewport changes (deferred so sizes have settled).
+    window.addEventListener('orientationchange', () => requestAnimationFrame(onResize));
+    window.visualViewport?.addEventListener('resize', onResize);
   }
 
   resize() {
