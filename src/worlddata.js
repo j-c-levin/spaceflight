@@ -15,7 +15,7 @@ export const HOME = {
   ],
   stations: [ [260,0,120], [-520,12,330], [780,-10,-480], [-220,0,-1050] ],
   gate: { targetId: 'binary', rings: 7, arcRadius: 1650, arcSpan: 1.4, ringHole: 70,
-          center: [0,0,-1650], facing: [0,0,1] },
+          center: [0,0,-2000], facing: [0,0,1] },
 };
 
 export const BINARY = {
@@ -35,7 +35,7 @@ export const BINARY = {
   ],
   stations: [ [300,0,-160], [-600,20,260], [120,-10,900] ],
   gate: { targetId: 'home', rings: 7, arcRadius: 1650, arcSpan: 1.4, ringHole: 70,
-          center: [0,0,1650], facing: [0,0,-1] },
+          center: [0,0,2000], facing: [0,0,-1] },
 };
 
 export const SYSTEM_DEFS = [HOME, BINARY];

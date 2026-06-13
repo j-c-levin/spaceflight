@@ -75,10 +75,13 @@ export class JumpController {
     }
     const dest = g.world.jumpTo(targetIndex);
     dest.gate.reset();
-    // place the ship just outside the destination portal, facing inward
-    const portal = dest.gate.portalPosition.clone();
-    g.ship.pos.copy(portal);
-    g.ship.root.position.copy(portal);
+    // Emerge INSIDE the destination system (well inside its gate course), facing
+    // the stars — so you arrive "in" the new system rather than out at the far
+    // portal, and don't clip the armed first ring on the way in. The return gate
+    // sits further out, ready when you fly back to the edge.
+    const ARRIVE_DIST = 500;
+    g.ship.pos.copy(dest.gate.facing).multiplyScalar(ARRIVE_DIST);
+    g.ship.root.position.copy(g.ship.pos);
     g.ship.root.lookAt(ORIGIN);
     g.ship.vel.set(0, 0, 0);
     g.ship.speed = 0;

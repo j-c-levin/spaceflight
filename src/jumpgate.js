@@ -23,27 +23,45 @@ export class JumpGate {
     this.group = new THREE.Group();
     parent.add(this.group);
 
-    // ---- local frame from the def ----
-    const center = new THREE.Vector3(...def.center);
-    const facing = new THREE.Vector3(...def.facing).normalize();
-    const up = new THREE.Vector3(0, 1, 0);
-    const right = new THREE.Vector3().crossVectors(facing, up).normalize();
-    this.center = center;
-    this.facing = facing;
-
-    // ---- rings along a banked S-curve marching toward the portal ----
+    // ---- course geometry ----
+    // Rings march OUTWARD: ring 0 sits closest to the system, each subsequent
+    // ring further out, and the portal furthest of all — directly ahead of the
+    // final ring. The player flies the rings in order heading away from the sun,
+    // then straight on through the portal.
     const N = def.rings;
+    const portalPos = new THREE.Vector3(...def.center); // furthest point
+    const dir = portalPos.clone().normalize();          // outward flight axis
+    const up = new THREE.Vector3(0, 1, 0);
+    const right = new THREE.Vector3().crossVectors(dir, up).normalize();
+    this.center = portalPos;
+    this.facing = dir;
+
+    const SPACING = 95;       // gap between consecutive rings (tight = quick run)
+    const END_GAP = 180;      // gap from the final ring to the portal
+    const ARC_LATERAL = 150;  // sideways arc bulge (0 at the first & last ring)
+    const ARC_VERTICAL = 55;  // vertical arc bulge
+
+    // positions first, so each ring's normal can point at the next ring / portal
+    const positions = [];
+    for (let i = 0; i < N; i++) {
+      const g = N > 1 ? i / (N - 1) : 0;                 // 0 = closest, 1 = at the end
+      const distFromPortal = END_GAP + (N - 1 - i) * SPACING;
+      const arc = Math.sin(g * Math.PI);                 // 0 at both ends, peaks mid-course
+      positions.push(
+        portalPos.clone()
+          .addScaledVector(dir, -distFromPortal)
+          .addScaledVector(right, arc * ARC_LATERAL)
+          .addScaledVector(up, arc * ARC_VERTICAL)
+      );
+    }
+
     this.rings = [];
     for (let i = 0; i < N; i++) {
-      const f = N > 1 ? i / (N - 1) : 0;
-      const dist = def.arcRadius * (1 - f);
-      const lateral = Math.sin(f * def.arcSpan * Math.PI) * def.arcRadius * 0.22;
-      const vertical = Math.sin(f * Math.PI) * 90;
-      const pos = center.clone()
-        .addScaledVector(facing, -dist)
-        .addScaledVector(right, lateral)
-        .addScaledVector(up, vertical);
-      const normal = facing.clone().normalize();
+      const pos = positions[i];
+      // normal points along the flight path toward the next ring (portal for the last),
+      // so the final ring's normal is `dir` — the portal is dead ahead of it.
+      const nextPos = i < N - 1 ? positions[i + 1] : portalPos;
+      const normal = nextPos.clone().sub(pos).normalize();
 
       const material = new THREE.MeshBasicMaterial({
         color: COL_FUTURE,
@@ -63,10 +81,10 @@ export class JumpGate {
       this.rings.push({ mesh, pos, normal, hole: def.ringHole, material });
     }
 
-    // ---- portal at the course end ----
+    // ---- portal: furthest out, dead ahead of the final ring ----
     this.portal = new THREE.Group();
-    this.portal.position.copy(center);
-    this.portal.lookAt(center.clone().add(facing));
+    this.portal.position.copy(portalPos);
+    this.portal.lookAt(portalPos.clone().add(dir));
     this.group.add(this.portal);
 
     this.portalRingMat = new THREE.MeshBasicMaterial({
