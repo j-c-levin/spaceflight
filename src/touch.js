@@ -76,11 +76,11 @@ export class TouchControls {
     const radius = () => el.clientWidth / 2 - this.stickThumb.clientWidth / 2;
 
     const move = (e) => {
-      const r = el.getBoundingClientRect();
-      const cx = r.left + r.width / 2;
-      const cy = r.top + r.height / 2;
-      let dx = e.clientX - cx;
-      let dy = e.clientY - cy;
+      // offsetX/Y are relative to the joystick element itself, so they sidestep
+      // the iOS standalone bug where event clientX/Y (visual viewport) and
+      // getBoundingClientRect (layout viewport) live in offset coordinate spaces.
+      let dx = e.offsetX - el.clientWidth / 2;
+      let dy = e.offsetY - el.clientHeight / 2;
       const R = radius();
       const mag = Math.hypot(dx, dy);
       if (mag > R) { dx = (dx / mag) * R; dy = (dy / mag) * R; }
@@ -114,8 +114,9 @@ export class TouchControls {
   _wireThrottle(track) {
     let id = null;
     const set = (e) => {
-      const r = track.getBoundingClientRect();
-      const frac = 1 - (e.clientY - r.top) / r.height;
+      // offsetY is relative to the track itself — same coordinate-space fix as
+      // the joystick, so the slider tracks the touch correctly in standalone iOS.
+      const frac = 1 - e.offsetY / track.clientHeight;
       const v = Math.max(0, Math.min(1, frac));
       this.input.throttleTarget = v;
       this._setThrottleVisual(v);

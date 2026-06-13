@@ -182,6 +182,7 @@ html, body {
   background: radial-gradient(circle, rgba(62, 230, 255, 0.55), rgba(62, 230, 255, 0.20));
   box-shadow: 0 0 16px var(--hud-glow);
   will-change: transform;
+  pointer-events: none; /* taps target the base, so offsetX/Y stay base-relative */
 }
 
 /* ---- throttle slider (left edge, above joystick) ---- */
@@ -203,6 +204,8 @@ html, body {
   box-shadow: 0 0 8px rgba(62, 230, 255, 0.25), inset 0 0 8px rgba(62, 230, 255, 0.12);
   overflow: hidden;
 }
+/* fill + thumb are visual only; taps target the track for base-relative offsetY */
+#touch-throttle-fill, #touch-throttle-thumb { pointer-events: none; }
 #touch-throttle-fill {
   position: absolute;
   left: 0;
