@@ -161,8 +161,8 @@ html, body {
 /* ---- steering joystick (bottom-left) ---- */
 #touch-stick {
   position: absolute;
-  left: 26px;
-  bottom: 30px;
+  left: calc(26px + env(safe-area-inset-left));
+  bottom: calc(30px + env(safe-area-inset-bottom));
   width: 132px;
   height: 132px;
   border-radius: 50%;
@@ -188,7 +188,7 @@ html, body {
 /* ---- throttle slider (left edge, above joystick) ---- */
 #touch-throttle {
   position: absolute;
-  left: 34px;
+  left: calc(34px + env(safe-area-inset-left));
   top: 16%;
   display: flex;
   flex-direction: column;
@@ -230,8 +230,8 @@ html, body {
 /* ---- action buttons (bottom-right) ---- */
 #touch-buttons {
   position: absolute;
-  right: 30px;
-  bottom: 30px;
+  right: calc(30px + env(safe-area-inset-right));
+  bottom: calc(30px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   align-items: center;

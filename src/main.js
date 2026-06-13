@@ -68,12 +68,20 @@ for (const evt of ['click', 'keydown']) {
   document.addEventListener(evt, () => audio.start(), { once: false });
 }
 
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+function handleResize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w / h;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  composer.setSize(window.innerWidth, window.innerHeight);
-});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(w, h);
+  composer.setSize(w, h);
+}
+window.addEventListener('resize', handleResize);
+// iOS standalone fires 'resize' unreliably on rotation/cold-launch; re-sync on
+// orientation and visual-viewport changes too, deferred a frame so dimensions
+// have settled before we read them.
+window.addEventListener('orientationchange', () => requestAnimationFrame(handleResize));
+window.visualViewport?.addEventListener('resize', () => requestAnimationFrame(handleResize));
 
 // ---- main loop ----
 let last = performance.now();
