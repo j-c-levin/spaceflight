@@ -204,6 +204,69 @@ export class HUD {
     ctx.shadowBlur = 0;
   }
 
+  // Draw the jump-gate progress block near top-center.
+  // Called from update() after clearing the canvas.
+  drawGate(gp, t) {
+    const ctx = this.ctx;
+    const cx = this.w / 2;
+    // Place below anything that might be top-center already (~15% down)
+    const topY = this.h * 0.15;
+
+    if (gp.phase === 'powering' || gp.phase === 'online') {
+      // Pulsing GATE ONLINE banner
+      const pulse = 0.65 + 0.35 * Math.sin(t * 4);
+      ctx.globalAlpha = pulse;
+      ctx.fillStyle = CYAN;
+      ctx.shadowColor = CYAN;
+      ctx.shadowBlur = 18;
+      ctx.font = 'bold 15px "Lucida Console", monospace';
+      ctx.letterSpacing = '3px';
+      ctx.textAlign = 'center';
+      ctx.fillText('GATE ONLINE', cx, topY);
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+      ctx.letterSpacing = '0px';
+      return;
+    }
+
+    // Show progress only mid-run (not at index 0, not past last ring)
+    if (gp.phase !== 'running' || gp.index <= 0 || gp.index >= gp.total) return;
+
+    // Label: JUMP GATE {index}/{total}
+    ctx.fillStyle = CYAN;
+    ctx.shadowColor = CYAN;
+    ctx.shadowBlur = 10;
+    ctx.font = '13px "Lucida Console", monospace';
+    ctx.letterSpacing = '2px';
+    ctx.textAlign = 'center';
+    ctx.fillText(`JUMP GATE ${gp.index}/${gp.total}`, cx, topY);
+    ctx.shadowBlur = 0;
+    ctx.letterSpacing = '0px';
+
+    // Timer bar beneath the text
+    const barW = 160, barH = 4;
+    const barX = cx - barW / 2;
+    const barY = topY + 8;
+    const frac = Math.max(0, Math.min(1, gp.timer / gp.timerMax));
+
+    // Background track
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = CYAN;
+    ctx.fillRect(barX, barY, barW, barH);
+    ctx.globalAlpha = 1;
+
+    // Filled portion — shift toward orange/red as timer drains
+    const r = Math.round(62 + (255 - 62) * (1 - frac));
+    const g = Math.round(230 - 230 * (1 - frac));
+    const b = Math.round(255 - 255 * (1 - frac) * 0.8);
+    const barColor = `rgba(${r},${g},${b},0.9)`;
+    ctx.fillStyle = barColor;
+    ctx.shadowColor = barColor;
+    ctx.shadowBlur = 6;
+    ctx.fillRect(barX, barY, barW * frac, barH);
+    ctx.shadowBlur = 0;
+  }
+
   update(game, time) {
     const { ship, input, treasure, combat, camera, audio } = game;
 
@@ -229,5 +292,9 @@ export class HUD {
     }
     const intercept = combat.interceptPoint(ship.pos, this._v.clone());
     if (intercept) this.drawTargetMarker(intercept, camera, time);
+
+    // ---- gate progress HUD ----
+    const gp = game.world?.activeSystem?.gate?.progress;
+    if (gp) this.drawGate(gp, time);
   }
 }
