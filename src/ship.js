@@ -18,6 +18,7 @@ export const FLIGHT = {
 const X_AXIS = new THREE.Vector3(1, 0, 0);
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 const Z_AXIS = new THREE.Vector3(0, 0, 1);
+const _faceMirror = new THREE.Vector3();
 
 // A small, agile arrow-shaped craft: body, nose, broad swept wings, twin
 // engines. NPCs use the same builder so they read as cousins of this ship.
@@ -125,6 +126,19 @@ export class PlayerShip {
   forward(out = this._fwd) {
     out.set(0, 0, -1).applyQuaternion(this.root.quaternion);
     return out;
+  }
+
+  // Point the ship's NOSE at a world-space target, wings kept level.
+  // The craft flies down its local -Z, but Object3D.lookAt aims local +Z at
+  // its argument — so a plain lookAt(target) would point the TAIL at the
+  // target and the nose 180 degrees away. Aim at the mirrored point instead
+  // so the nose lands on `target`; lookAt's default up keeps the horizon flat.
+  faceToward(target) {
+    // Position first: lookAt derives its direction from the root's current
+    // world position, so it must already sit at this.pos before we aim.
+    this.root.position.copy(this.pos);
+    _faceMirror.copy(this.pos).multiplyScalar(2).sub(target);
+    this.root.lookAt(_faceMirror);
   }
 
   update(dt, input) {

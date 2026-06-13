@@ -35,9 +35,9 @@ export class JumpController {
       const k = Math.min(this.t / PULL_TIME, 1);
       const ease = k * k;                       // accelerate into the portal
       g.ship.pos.lerpVectors(this._from, this._portal, ease);
-      g.ship.root.position.copy(g.ship.pos);
-      // Ship orientation is driven by lookAt(this._portal) during pull; left as-is during arriving.
-      g.ship.root.lookAt(this._portal);
+      // Nose stays pointed INTO the portal during the pull (faceToward accounts
+      // for the ship's -Z forward); orientation is left as-is during arriving.
+      g.ship.faceToward(this._portal);
       this.warp.update(dt, k * 0.5);            // phase 0 -> 0.5 (flash builds to peak)
       if (k >= 1) {
         this._swap();
@@ -81,8 +81,9 @@ export class JumpController {
     // sits further out, ready when you fly back to the edge.
     const ARRIVE_DIST = 500;
     g.ship.pos.copy(dest.gate.facing).multiplyScalar(ARRIVE_DIST);
-    g.ship.root.position.copy(g.ship.pos);
-    g.ship.root.lookAt(ORIGIN);
+    // Nose points INTO the system (toward the star), so you arrive looking at
+    // the new system rather than back out at the return gate behind you.
+    g.ship.faceToward(ORIGIN);
     g.ship.vel.set(0, 0, 0);
     g.ship.speed = 0;
   }
