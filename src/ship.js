@@ -12,7 +12,7 @@ export const FLIGHT = {
   maxPitchRate: 1.2,
   maxBank: 0.62,           // ~35 degrees
   autoLevelRate: 0.9,      // rad/s max wings-leveling roll
-  boostDrainTime: 4.0,     // seconds of boost from a full tank
+  boostDrainTime: 16.0,    // seconds of boost from a full tank
 };
 
 const X_AXIS = new THREE.Vector3(1, 0, 0);
