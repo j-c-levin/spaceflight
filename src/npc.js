@@ -12,6 +12,14 @@ function randomDestination() {
   return new THREE.Vector3(Math.cos(a) * r, (Math.random() - 0.5) * 50, Math.sin(a) * r);
 }
 
+// Wanderers roam a tighter band so the passive fleet stays visible and lively
+// around the play area instead of drifting off to the far edges.
+function wanderDestination() {
+  const a = Math.random() * Math.PI * 2;
+  const r = 120 + Math.random() * 480;
+  return new THREE.Vector3(Math.cos(a) * r, (Math.random() - 0.5) * 60, Math.sin(a) * r);
+}
+
 class NPCShip {
   constructor(scene, glowTex, color, hostile) {
     this.hostile = hostile;
@@ -36,7 +44,7 @@ class NPCShip {
     this.baseTurnRate = hostile ? 1.1 : 0.6;
 
     this.state = hostile ? STATE.APPROACH : STATE.WANDER;
-    this.destination = randomDestination();
+    this.destination = hostile ? randomDestination() : wanderDestination();
     this.stateTimer = 0;
     this.fireTimer = 0;
     this.flankSide = Math.random() < 0.5 ? -1 : 1;
@@ -88,7 +96,7 @@ class NPCShip {
     if (!this.hostile) {
       // -------- harmless wanderer --------
       this._desired.subVectors(this.destination, this.pos);
-      if (this._desired.length() < 25) this.destination = randomDestination();
+      if (this._desired.length() < 25) this.destination = wanderDestination();
       this._desired.normalize();
       this.steerToward(this._desired, turnRate, dt);
     } else {
@@ -179,7 +187,7 @@ class NPCShip {
     do { this.pos.copy(randomDestination()); }
     while (this.pos.distanceTo(game.ship.pos) < 150);
     this.vel.set(0, 0, 0);
-    this.destination = randomDestination();
+    this.destination = this.hostile ? randomDestination() : wanderDestination();
     this.state = this.hostile ? STATE.APPROACH : STATE.WANDER;
   }
 }
@@ -206,6 +214,18 @@ export class NPCFleet {
       // only a living, non-active ship's mesh should follow `active`;
       // dead ships stay hidden until they respawn.
       s.mesh.visible = active && s.alive;
+    }
+  }
+
+  // Re-seed the entire fleet: every ship alive, repositioned and roaming.
+  // Called when the home system (re)activates so flying back through a gate
+  // always drops you into a full, lively fleet rather than a depleted one
+  // whose dead ships' respawn timers were frozen while you were away.
+  respawnAll(game) {
+    for (const s of this.ships) {
+      s.alive = true;
+      s.respawnTimer = 0;
+      s.respawn(game);
     }
   }
 

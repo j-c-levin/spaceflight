@@ -96,7 +96,10 @@ export class Combat {
     return out.copy(t0.pos).addScaledVector(V, t);
   }
 
-  // Click selection: pick the NPC nearest the cursor in screen space.
+  // Click selection: pick the NPC nearest the cursor in screen space. Only
+  // swaps to a ship actually under the cursor — clicking empty space keeps the
+  // current (auto-acquired) target rather than deselecting, so you're never
+  // left without a lock.
   trySelect(cursorNDC, camera, npcs) {
     let best = null;
     let bestDist = 0.12; // generous NDC radius
@@ -108,8 +111,27 @@ export class Combat {
       const d = Math.hypot(v.x - cursorNDC.x, v.y - cursorNDC.y);
       if (d < bestDist) { bestDist = d; best = s; }
     }
-    this.target = best; // null = clicked empty space → deselect
+    if (best) this.target = best;
     return best;
+  }
+
+  // Auto-acquire a target when we don't have a live one. Prefers the nearest
+  // hostile (the actual threat), falling back to the nearest ship of any kind.
+  // Only fires where ships exist (the home system), so jumping out drops the
+  // lock and arriving back home re-locks automatically.
+  autoTarget(game) {
+    if (!game.npcs.active) return;
+    if (this.target && this.target.alive) return;
+    const pos = game.ship.pos;
+    let best = null;
+    let bestScore = Infinity;
+    for (const s of game.npcs.ships) {
+      if (!s.alive) continue;
+      // weight passive ships as 4x farther so a hostile always wins when present
+      const score = s.pos.distanceToSquared(pos) * (s.hostile ? 1 : 4);
+      if (score < bestScore) { bestScore = score; best = s; }
+    }
+    this.target = best;
   }
 
   update(dt, game) {
@@ -161,5 +183,6 @@ export class Combat {
     }
 
     if (this.target && !this.target.alive) this.target = null;
+    this.autoTarget(game);
   }
 }

@@ -132,6 +132,9 @@ function frame(now) {
 
   // treasure orbs & NPCs live only in the home system — hide/freeze them away.
   const homeActive = world.activeSystem.def.id === 'home';
+  // Re-entering home: re-seed a full fleet so the ships you saw fly off (or
+  // shot down) before jumping are all back and roaming.
+  if (homeActive && !npcs.active) npcs.respawnAll(game);
   treasure.setActive(homeActive);
   npcs.setActive(homeActive);
 

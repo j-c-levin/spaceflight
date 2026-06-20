@@ -75,6 +75,9 @@ export class JumpController {
     }
     const dest = g.world.jumpTo(targetIndex);
     dest.gate.reset();
+    // Drop the current lock on transit; Combat.autoTarget re-acquires a valid
+    // ship once we arrive somewhere that has any (the home system).
+    g.combat.target = null;
     // Emerge INSIDE the destination system (well inside its gate course), facing
     // the stars — so you arrive "in" the new system rather than out at the far
     // portal, and don't clip the armed first ring on the way in. The return gate
