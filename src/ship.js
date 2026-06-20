@@ -114,6 +114,8 @@ export class PlayerShip {
     this.boostEnergy = 1;
     this.boosting = false;
     this.speed = 0;
+    this._boostTaps = [];
+    this._prevBoostInput = false;
     this.controlsLocked = false;                // external controller owns pos during a jump
 
     this._fwd = new THREE.Vector3();
@@ -167,6 +169,19 @@ export class PlayerShip {
     if (wantBoost) {
       this.boostEnergy = Math.max(0, this.boostEnergy - dt / FLIGHT.boostDrainTime);
     }
+
+    // ---- secret refill: triple-tap boost within 1 s when tank is empty ----
+    const boostEdge = input.boosting && !this._prevBoostInput;
+    if (boostEdge && this.boostEnergy <= 0.02) {
+      const now = performance.now();
+      this._boostTaps.push(now);
+      this._boostTaps = this._boostTaps.filter(t => now - t < 1000);
+      if (this._boostTaps.length >= 3) {
+        this.boostEnergy = 1;
+        this._boostTaps = [];
+      }
+    }
+    this._prevBoostInput = input.boosting;
 
     // ---- steering: local-axis rotation (the Freelancer model) ----
     // Cursor deflection sets constant pitch/yaw rates around the ship's OWN
