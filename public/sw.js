@@ -39,20 +39,19 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(networkFirst(request));
+    event.respondWith(networkFirst(event, request));
     return;
   }
 
   if (request.url.startsWith(self.registration.scope)) {
-    event.respondWith(cacheFirst(request));
+    event.respondWith(cacheFirst(event, request));
   }
 });
 
-async function networkFirst(request) {
+async function networkFirst(event, request) {
   try {
     const response = await fetch(request);
-    const cache = await caches.open(CACHE_NAME);
-    cache.put(request, response.clone());
+    event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone())));
     return response;
   } catch (err) {
     const cached = await caches.match(request);
@@ -61,12 +60,11 @@ async function networkFirst(request) {
   }
 }
 
-async function cacheFirst(request) {
+async function cacheFirst(event, request) {
   const cached = await caches.match(request);
   if (cached) return cached;
 
   const response = await fetch(request);
-  const cache = await caches.open(CACHE_NAME);
-  cache.put(request, response.clone());
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone())));
   return response;
 }
