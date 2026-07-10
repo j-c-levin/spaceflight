@@ -54,14 +54,14 @@ async function networkFirst(event, request) {
     event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone())));
     return response;
   } catch (err) {
-    const cached = await caches.match(request);
+    const cached = await caches.match(request, { ignoreVary: true });
     if (cached) return cached;
     throw err;
   }
 }
 
 async function cacheFirst(event, request) {
-  const cached = await caches.match(request);
+  const cached = await caches.match(request, { ignoreVary: true });
   if (cached) return cached;
 
   const response = await fetch(request);
