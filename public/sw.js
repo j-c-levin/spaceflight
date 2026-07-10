@@ -48,13 +48,21 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
+// ignoreVary: true on every lookup below is required, not optional. Static
+// hosts commonly send `Vary: Origin` on asset responses, but the install-time
+// cache-population fetch and a real browser-issued <script crossorigin>/<link
+// crossorigin> request carry different Origin-header semantics — with the
+// default (Vary-respecting) match, every lookup misses, 100% of the time,
+// and offline play silently breaks (confirmed live: blank unstyled page).
 async function networkFirst(event, request) {
   try {
     const response = await fetch(request);
-    event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone())));
+    if (response.ok) {
+      event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone())));
+    }
     return response;
   } catch (err) {
-    const cached = await caches.match(request, { ignoreVary: true });
+    const cached = await caches.match(request, { ignoreVary: true, ignoreSearch: true });
     if (cached) return cached;
     throw err;
   }
@@ -65,6 +73,8 @@ async function cacheFirst(event, request) {
   if (cached) return cached;
 
   const response = await fetch(request);
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone())));
+  if (response.ok) {
+    event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone())));
+  }
   return response;
 }
