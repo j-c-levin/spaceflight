@@ -156,3 +156,9 @@ function frame(now) {
   composer.render();
 }
 requestAnimationFrame(frame);
+
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js');
+  });
+}
